@@ -1,0 +1,34 @@
+# Main project dependencies
+numpy>=1.20.0
+pandas>=1.3.0
+matplotlib>=3.4.0
+seaborn>=0.11.0
+scikit-learn>=1.0.0
+tensorflow>=2.8.0
+jupyter>=1.0.0
+requests>=2.25.0
+python-dotenv>=0.19.0
+fastapi>=0.70.0
+uvicorn>=0.15.0
+
+# Data processing
+xarray>=0.20.0
+netCDF4>=1.5.0
+scipy>=1.7.0
+
+# Geospatial libraries
+geopandas>=0.10.0
+cartopy>=0.20.0
+pyproj>=3.1.0
+
+# Web scraping and data collection
+beautifulsoup4>=4.10.0
+selenium>=4.0.0
+playwright>=1.15.0
+
+# API interaction
+google-cloud-storage>=2.0.0
+google-api-python-client>=2.0.0
+
+# For the frontend
+# Node.js packages will be managed separately in package.json
