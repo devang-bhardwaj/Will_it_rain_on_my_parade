@@ -1,111 +1,184 @@
-# Data Collection Strategy
+# Historical Weather Data Collection
 
-This document outlines the strategy for collecting weather and rainfall data for our "Will it rain on my parade?" project.
+## Overview
+
+This document details our approach for collecting historical weather data from NASA Earth observation datasets to support our "Will It Rain On My Parade?" challenge solution. We focus on gathering comprehensive historical weather data to enable probabilistic analysis of weather conditions.
 
 ## Data Sources
 
-### 1. NASA Earth Data
+### Primary NASA Earth Observation Data Sources
 
-NASA provides several datasets that are relevant to our project:
+1. **MODIS (Moderate Resolution Imaging Spectroradiometer)**
+   - Source: NASA LAADS DAAC (Level-1 and Atmosphere Archive & Distribution System)
+   - Access: [LAADS DAAC](https://ladsweb.modaps.eosdis.nasa.gov/)
+   - Products:
+     - MOD11: Land Surface Temperature and Emissivity
+     - MYD11: Aqua Land Surface Temperature and Emissivity
+   - Data format: HDF-EOS
 
-- **IMERG (Integrated Multi-satellitE Retrievals for GPM)**: Provides precipitation estimates worldwide.
-  - URL: [https://gpm.nasa.gov/data/imerg](https://gpm.nasa.gov/data/imerg)
-  - Parameters: Precipitation rate, precipitation type
+2. **GPM (Global Precipitation Measurement)**
+   - Source: NASA GES DISC (Goddard Earth Sciences Data and Information Services Center)
+   - Access: [GPM Data](https://gpm.nasa.gov/data/directory)
+   - Products:
+     - IMERG (Integrated Multi-satellitE Retrievals for GPM)
+     - Daily precipitation accumulation
+   - Data format: NetCDF, HDF5
 
-- **MODIS Atmosphere**: Cloud and aerosol properties.
-  - URL: [https://modis-atmosphere.gsfc.nasa.gov/](https://modis-atmosphere.gsfc.nasa.gov/)
-  - Parameters: Cloud coverage, cloud optical thickness
+3. **MERRA-2 (Modern-Era Retrospective Analysis for Research and Applications)**
+   - Source: NASA GES DISC
+   - Access: [MERRA-2](https://disc.gsfc.nasa.gov/datasets?project=MERRA-2)
+   - Products:
+     - Surface temperature
+     - Wind speed and direction
+     - Precipitation
+     - Relative humidity
+   - Data format: NetCDF
 
-- **MERRA-2 (Modern-Era Retrospective analysis for Research and Applications, Version 2)**: Provides historical weather data.
-  - URL: [https://gmao.gsfc.nasa.gov/reanalysis/MERRA-2/](https://gmao.gsfc.nasa.gov/reanalysis/MERRA-2/)
-  - Parameters: Temperature, humidity, wind speed, atmospheric pressure
+4. **POWER (Prediction of Worldwide Energy Resources)**
+   - Source: NASA Langley Research Center
+   - Access: [POWER Data Access Viewer](https://power.larc.nasa.gov/)
+   - Products:
+     - Temperature
+     - Humidity
+     - Solar radiation
+     - Wind speed
+   - Data format: CSV, NetCDF
 
-### 2. NOAA Weather Data
+### Data Collection Tools
 
-- **National Centers for Environmental Information (NCEI)**: Historical weather station data.
-  - URL: [https://www.ncdc.noaa.gov/cdo-web/](https://www.ncdc.noaa.gov/cdo-web/)
-  - Parameters: Temperature, precipitation, wind speed, humidity
+1. **AI-Agent-Scraper Integration**
+   - Purpose: Automated collection of weather data from NASA sources
+   - Components:
+     - Web interface navigation
+     - Dataset request and download automation
+     - Data extraction and preprocessing
+   - Configuration: See \src/data_collection/ai_agent_scraper_integration.py\
 
-- **Weather Prediction Center**: Forecast data and weather models.
-  - URL: [https://www.wpc.ncep.noaa.gov/](https://www.wpc.ncep.noaa.gov/)
+2. **NASA Earth Data Search API**
+   - Purpose: Programmatic access to NASA Earth observation data
+   - Features:
+     - Spatial and temporal filtering
+     - Dataset discovery and metadata access
+     - Direct download capabilities
+   - Authentication: NASA Earthdata Login required
 
-### 3. Open Weather Map API
+3. **OPeNDAP (Open-source Project for a Network Data Access Protocol)**
+   - Purpose: Remote access to subsets of larger datasets
+   - Features:
+     - Subsetting by variable, time, and region
+     - Aggregation of data across multiple files
+     - Format conversion options
 
-- Provides current weather data, forecasts, and historical data through API.
-  - URL: [https://openweathermap.org/api](https://openweathermap.org/api)
-  - Parameters: Temperature, humidity, pressure, clouds, wind, rain
+## Data Collection Strategy
 
-### 4. Local Weather Services
+### Geographic Coverage
 
-- Country-specific weather services that may have more localized data.
+- Global coverage with focus on populated areas
+- Spatial resolution varies by dataset (0.5° to 1km)
+- Coordinate system: Geographic (latitude/longitude)
 
-## Data Collection Methods
+### Temporal Coverage
 
-### Using AI-Agent-Scraper
+- Historical data spanning multiple years (minimum 10 years where possible)
+- Daily temporal resolution (aggregated from higher resolution data where necessary)
+- Focus on day-of-year patterns to identify seasonal trends
 
-We will use the AI-Agent-Scraper tool for websites that don't provide direct API access. This tool allows us to:
+### Data Variables
 
-1. Navigate to weather data websites
-2. Extract structured data from complex web pages
-3. Handle authentication and session management
-4. Export data in various formats (JSON, CSV)
+1. **Temperature Data**
+   - Daily maximum temperature (°C)
+   - Daily minimum temperature (°C)
+   - Daily average temperature (°C)
+   - Temperature anomalies from historical averages
 
-#### Example AI-Agent-Scraper Prompts for Weather Data
+2. **Precipitation Data**
+   - Daily precipitation amount (mm)
+   - Precipitation intensity
+   - Precipitation frequency
+   - Precipitation type (where available)
 
-```bash
-Go to https://www.ncdc.noaa.gov/cdo-web/datasets, search for "Global Summary of the Day", and extract the dataset description, coverage period, and update frequency as JSON.
-```
+3. **Wind Data**
+   - Daily maximum wind speed (km/h)
+   - Daily average wind speed (km/h)
+   - Wind direction
+   - Gust information (where available)
 
-```bash
-Visit https://earth.nullschool.net/, focus on rainfall visualization for North America region, take screenshots every 6 hours for the next 24 hours forecast, and save as both images and underlying data as CSV.
-```
+4. **Humidity and Comfort Indices**
+   - Relative humidity (%)
+   - Heat index
+   - Discomfort index (derived from temperature and humidity)
+   - Dew point
 
-### API Integration
+### Collection Process
 
-For services that provide APIs (like OpenWeatherMap), we'll create direct API integration scripts in the `src/data_collection` directory:
+1. **Data Identification**
+   - Identify relevant datasets based on variables, coverage, and resolution
+   - Verify data quality and availability
+   - Assess data format compatibility
 
-- `weather_api_client.py`: General interface for all weather APIs
-- `nasa_earth_data.py`: Specific implementation for NASA Earth Data
-- `noaa_data_collector.py`: Specific implementation for NOAA data
-- `openweathermap_collector.py`: Implementation for OpenWeatherMap API
+2. **Automated Collection**
+   - Configure AI-Agent-Scraper for target datasets
+   - Set up authentication and access credentials
+   - Schedule regular data retrieval jobs
 
-### Scheduled Collection
+3. **Data Validation**
+   - Verify completeness of collected data
+   - Check for anomalies or inconsistencies
+   - Compare against secondary sources when possible
 
-We'll set up scheduled collection tasks to gather:
+4. **Storage and Management**
+   - Store raw data in native formats
+   - Implement version control for dataset updates
+   - Maintain metadata about source, collection time, and processing steps
 
-1. Real-time weather data (hourly)
-2. Short-term forecasts (6-hour intervals)
-3. Historical data (daily collection until we have sufficient historical context)
+## File Organization
 
-## Data Storage
-
-All collected data will be stored in the following structure:
-
-```bash
+\\\
 data/
 ├── raw/
 │   ├── nasa/
-│   │   ├── imerg/
-│   │   └── modis/
-│   ├── noaa/
-│   └── openweathermap/
+│   │   ├── MODIS/
+│   │   │   └── [raw MODIS files]
+│   │   ├── GPM/
+│   │   │   └── [raw GPM files]
+│   │   ├── MERRA-2/
+│   │   │   └── [raw MERRA-2 files]
+│   │   └── POWER/
+│   │       └── [raw POWER files]
+│   └── supplementary/
+│       └── [additional data sources]
 └── processed/
-    ├── combined_datasets/
-    ├── feature_extracted/
-    └── model_ready/
-```
+    ├── temperature/
+    │   └── [processed temperature datasets]
+    ├── precipitation/
+    │   └── [processed precipitation datasets]
+    ├── wind/
+    │   └── [processed wind datasets]
+    └── combined/
+        └── [integrated datasets for analysis]
+\\\
 
-## Ethical and Technical Considerations
+## Data Collection Challenges
 
-1. We will respect rate limits of all APIs and websites
-2. Data will be properly cited and attributed to original sources
-3. We'll implement error handling and retry mechanisms for API failures
-4. All API keys and credentials will be stored securely using environment variables
+1. **Large Dataset Sizes**
+   - Challenge: NASA Earth observation datasets can be extremely large (TB scale)
+   - Solution: Implement spatial and temporal subsetting to retrieve only needed data
+
+2. **API Rate Limitations**
+   - Challenge: NASA APIs may have request rate limitations
+   - Solution: Implement rate limiting and batch processing in collection scripts
+
+3. **Format Diversity**
+   - Challenge: Different datasets use different formats (HDF, NetCDF, etc.)
+   - Solution: Develop specific parsers for each format to standardize data
+
+4. **Missing Data**
+   - Challenge: Gaps in historical records
+   - Solution: Document missing periods and implement interpolation strategies
 
 ## Next Steps
 
-1. Set up API accounts and get necessary API keys
-2. Configure AI-Agent-Scraper for each data source
-3. Create initial data collection scripts
-4. Run test collection to verify data quality and formats
-5. Implement data quality checks and validation
+1. Complete AI-Agent-Scraper integration for automated data collection
+2. Set up data collection pipeline for all required NASA datasets
+3. Implement data validation and quality control procedures
+4. Create a metadata catalog for collected datasets
