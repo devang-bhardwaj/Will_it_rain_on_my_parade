@@ -1,1 +1,4 @@
 /Ai-Agent-Scraper
+
+#Ignore vscode AI rules
+.github\instructions\codacy.instructions.md
